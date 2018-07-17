@@ -1,0 +1,15 @@
+---
+ - name: checking the status
+     shell: diff /opt/openshift/Ansible_Docker/centos/infra-scripts/support/root.bashrc $HOME/.bashrc
+     failed_when: "diff.rc > 1"
+     register: diff
+   - debug:
+        var: diff
+   - name: copy bash rc profile
+     shell: cp  /opt/openshift/Ansible_Docker/centos/infra-scripts/support/root.bashrc $HOME/.bashrc && chmod 0644 $HOME/.bashrc
+   - name: check AMEX_ENV
+     shell: sed -i '/AMEC_ENV/d' $HOME/.bashrc && echo "export AMEX_ENV=\"{{currentENV}}\";">> $HOME/.bashrc
+     when: not currentENV=="" or currentENV is defined
+
+   - name: applying dircolors
+     shell: cp -f  /opt/openshift/Ansible_Docker/centos/infra-scripts/support/dircolors $HOME/.dircolors

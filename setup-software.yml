@@ -1,0 +1,13 @@
+--- 
+- name: install git and screen
+  shell: yum install -y  git screen
+- name: removing docker packages
+  shell: yum remove -y docker docker-client docker-common docker-rhel-push-plugin docker-engine -y
+- pause:
+      prompt: Are you really sure you want to completely PURGE docker (lib/etc/run)? [y/n] 
+   register: output
+- name: removing docker selinux
+  shell: yum remove -y docker-selinux  docker-ce && rm -fr /var/lib/docker /var/run/docker /etc/docker
+  when: output.user_input=="y"
+- name: install  docker packages  
+  shell: yum install -y /opt/openshift/Ansible_Docker/centos/infra-scripts/support/docker-ce-18.03.0.ce-1.el7.centos.x86_64.rpm

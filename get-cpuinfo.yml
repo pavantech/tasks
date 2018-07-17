@@ -1,0 +1,13 @@
+---
+- name: getting memory infroamtion 
+  shell: grep MemTotal /proc/meminfo | tr -s ' '
+  register: mem
+- name: geting cpu inforamtion
+  shell: lscpu | grep '^CPU(s):\|Model name' | tr -s '  '
+  register: cpu
+- name: memory info
+  debug:
+    var: mem
+- name: cpu info  
+  debug:
+     var: cpu

@@ -1,0 +1,8 @@
+--- 
+# get rid of firewalld
+- name: 'Disable firewalld';
+  shell: systemctl stop firewalld && systemctl disable firewalld
+
+# ensure iptables
+- name:  'Enable iptables'
+  shell: systemctl enable iptables && systemctl stop iptables && systemctl start iptables && systemctl reload iptables

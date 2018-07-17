@@ -1,0 +1,6 @@
+---
+ - pause:
+      prompt: Enter a currentEnv
+   register: currentENV
+- name: check AMEX_ENV
+  shell: sed -i '/AMEC_ENV/d' $HOME/.bashrc && echo "export AMEX_ENV=\"{{currentENV.user_input}}\";">> $HOME/.bashrc
