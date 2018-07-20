@@ -1,0 +1,23 @@
+--- 
+- name: Doing sysctl tuning for docker 
+  shell: cat /tmp/support/sysctl-docker.conf > /etc/sysctl.d/98-docker.conf
+  
+- name: Doing sysctl tuning for docker 
+  shell: sysctl -p /etc/sysctl.d/98-docker.conf
+  
+- name: Getting primary IPv4 address 
+  shell: ip -o -4 addr show up primary scope global | grep '10.' | head | tr -s ' ' | cut -d' ' -f4 | cut -d/ -f1
+  register: ipAddr
+- name: Determined primary IPv4 as {{ipAddr}}
+  shell: mkdir -p "/etc/docker";
+
+- name: writing docker configuration to /etc/docker
+  shell: sed 's/__CLUSTER_ADVERTISE__/\'"{{ipAddr}}"\'/' "/tmp/support/docker-daemon-template.json" > "/etc/docker/daemon.json"
+- name: starting docker..
+  shell: systemctl enable docker && systemctl start docker
+- pause:
+   prompt: "Should I try to leave an existing docker swarm? [y/n]"
+  register: status
+- name: Leave docker swarm 
+  shell: docker swarm leave --force
+  when: status=="y"
