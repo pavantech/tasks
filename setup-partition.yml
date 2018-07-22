@@ -1,0 +1,55 @@
+---
+- name: set device variable
+  set_fact:
+     device: '/dev/sdb'
+- name: set device variable
+  set_fact:
+     vgName: 'data'
+- name: set device variable
+  set_fact:
+     lvName: 'data00'
+- name: set device variable
+  set_fact:
+     fsType: 'xfs'
+- name: set device variable
+  set_fact:
+     mountTo: '/data00'
+- name: set device variable
+  set_fact:
+     devicePartition="{{device}}1"
+- name: set device variable
+  set_fact:
+     mountFrom="/dev/mapper/{{vgName}}-{{lvName}}"
+- name: set device variable
+  set_fact:
+    mkfsCommand="mkfs.{{fsType}}";	
+- name:	 
+  shell: command -v "$mkfsCommand" >/dev/null 2>&1 || { echo "$fsType is not a supported filesystem on this system" >&2; echo "Abort: $mkfsCommand does not exist" >&2; exit 1;}
+- name: 
+  shell: lvs | grep -q "{{lvName}}"'[[:space:]]*'"{{vgName}}" && { echo "Abort: Logical volume {{lvName}} already exists in vg {{vgName}}" >&2; exit 1;} 
+- name:
+  shell: [ -e "{{mountFrom}}" ] && { echo "Abort: device exists {{mountFrom}" >&2; exit 1;}
+  
+- name:
+  shell: echo "All checks passed!!! Provisioning new LVM using:"; && echo "  Device: $device"; && echo "  Device Partition: $devicePartition"; && echo "  Volume Group: $vgName";&& echo "  Logical Volume: $lvName"; && echo "  FS Type: $fsType"; && echo "  Mount: $mountFrom -> $mountTo";
+
+- name:
+  shell: echo "All checks passed!!! Provisioning new LVM using:"; && echo "  Device: $device"; && echo "  Device Partition: $devicePartition"; && echo "  Volume Group: $vgName";&& echo "  Logical Volume: $lvName"; && echo "  FS Type: $fsType"; && echo "  Mount: $mountFrom -> $mountTo";
+- name:
+  shell: echo "Writing new Linux LVM (8e) partition to $device"; ( echo o # Create a new empty DOS partition table echo n # Add a new partition echo p # Primary partition
+
+echo 1 # Partition number
+
+echo   # First sector (Accept default: 2048)
+
+echo   # Last sector (Accept default: varies)
+
+echo t # Change partition type (default is Linux 83)
+
+echo 8e # Specify Linux LVM (8e) as partition type
+
+echo w # Write changes
+
+echo p # Show partition table
+
+) | fdisk "$device";
