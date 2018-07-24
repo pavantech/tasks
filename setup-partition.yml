@@ -36,20 +36,32 @@
 - name:
   shell: echo "All checks passed!!! Provisioning new LVM using:"; && echo "  Device: $device"; && echo "  Device Partition: $devicePartition"; && echo "  Volume Group: $vgName";&& echo "  Logical Volume: $lvName"; && echo "  FS Type: $fsType"; && echo "  Mount: $mountFrom -> $mountTo";
 - name:
-  shell: echo "Writing new Linux LVM (8e) partition to $device"; ( echo o # Create a new empty DOS partition table echo n # Add a new partition echo p # Primary partition
+  shell: |
+      echo "Writing new Linux LVM (8e) partition to $device";
 
-echo 1 # Partition number
+      (
 
-echo   # First sector (Accept default: 2048)
+      echo o # Create a new empty DOS partition table
 
-echo   # Last sector (Accept default: varies)
+      echo n # Add a new partition
 
-echo t # Change partition type (default is Linux 83)
+      echo p # Primary partition
 
-echo 8e # Specify Linux LVM (8e) as partition type
+      echo 1 # Partition number
 
-echo w # Write changes
+      echo   # First sector (Accept default: 2048)
 
-echo p # Show partition table
+      echo   # Last sector (Accept default: varies)
 
-) | fdisk "$device";
+      echo t # Change partition type (default is Linux 83)
+
+      echo 8e # Specify Linux LVM (8e) as partition type
+
+     echo w # Write changes
+
+     echo p # Show partition table
+
+      ) | fdisk "{{device}}"
+   register: output
+   
+
