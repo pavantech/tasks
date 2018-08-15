@@ -1,0 +1,63 @@
+version: '3.3'
+
+configs:
+  elastic-apm-server-config:
+    external: true
+
+services:
+  elasticsearch:
+     image: docker.elastic.co/elasticsearch/elasticsearch:6.3.2
+     container_name:  elasticsearch
+     ports:
+       - 9200:9200
+       - 9300:9300
+     networks:
+       - backend1
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:6.3.2
+    container_name: kibana
+    ports:
+      - 5601:5601
+    links:
+     - elasticsearch
+    networks:
+         - backend1
+
+  apm-server:
+    configs:
+      - source: elastic-apm-server-config
+        target: /usr/share/apm-server/apm-server.yml
+    image: docker.elastic.co/apm/apm-server-oss:6.3.2
+    container_name: apm-server
+    links:
+      - elasticsearch
+      - kibana
+    networks:
+       - backend1
+    ports:
+      - 8200:8200
+  ansible-play:
+     image: ansible_playbook
+     restart: always
+     entrypoint: tail -f /dev/null
+     volumes:
+        - ansible_log:/var/log/ansible
+     networks:
+        - backend1
+  logstash:
+      image: docker.elastic.co/logstash/logstash-oss:6.3.2
+      container_name: logstash
+      links:
+       - elasticsearch
+       - kibana
+      volumes:
+        - ansible_log:/var/log/ansible
+      networks:
+        - backend1
+volumes:
+   ansible_log:
+
+networks:
+  backend1:
+    driver: "overlay"
